@@ -173,12 +173,9 @@ function App() {
       color: "#e0e0ff",
       minHeight: "100vh",
       fontFamily: "'Courier New', monospace",
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
       overflow: "auto",
+      margin: 0,
+ 
     },
     title: {
       fontSize: 36,
