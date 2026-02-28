@@ -479,7 +479,7 @@ function App() {
             textAlign: "center",
             color: "#ffffff99",
             fontSize: 12,
-            marginTop: 20,
+            marginTop: 0,
             letterSpacing: 2,
           }}
         >
