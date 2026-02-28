@@ -4,7 +4,7 @@ import defaultText from "./assets/defaulttext";
 function App() {
   const [text, setText] = useState(defaultText);
   const [wpm, setWpm] = useState(200);
-  const [mode, setMode] = useState("horizontal");
+  const [mode, setMode] = useState("single");
   const [isPlaying, setIsPlaying] = useState(false);
 
   const words = useMemo(() => {
