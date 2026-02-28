@@ -174,7 +174,7 @@ function App() {
       minHeight: "100vh",
       fontFamily: "'Courier New', monospace",
       overflow: "auto",
-      margin: 0,
+    
  
     },
     title: {
@@ -299,6 +299,10 @@ function App() {
   };
 
   return (
+    <div>
+
+
+  
     <div style={styles.app}>
       <div style={styles.title}>⚡ SPEED READER</div>
 
@@ -480,7 +484,10 @@ function App() {
         ✦ Version <strong>3.2</strong> ✦
       </div>
     </div>
+    </div>
   );
+  
 }
+
 
 export default App;
