@@ -222,8 +222,8 @@ function App() {
       transition: "all 0.2s",
     }),
     displayBox: {
-      width: "60vw",
-      maxWidth: 700,
+      width: "80vw",
+      maxWidth: 1000,
       margin: "40px auto",
       background: "#ffffff08",
       border: "1px solid #00d4ff22",
