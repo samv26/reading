@@ -343,7 +343,7 @@ function App() {
         <div style={styles.displayBox}>
           <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{
-              fontSize: 52,
+              fontSize: 40,
               fontWeight: "bold",
               color: "#ffffff",
               letterSpacing: 2,
