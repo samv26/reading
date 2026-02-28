@@ -169,13 +169,22 @@ function App() {
     app: {
       padding: "40px",
       background:
-        "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+        "linear-gradient(135deg, #1a1a1a 0%, #16213e 50%, #0f3460 100%)",
       color: "#e0e0ff",
       minHeight: "100vh",
       fontFamily: "'Courier New', monospace",
       overflow: "auto",
-    
- 
+    },
+    content: {
+      height: "80vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 20,
+      width: "80vw",
+      maxWidth: 1000,
+      margin: "0 auto",
     },
     title: {
       fontSize: 36,
@@ -186,7 +195,7 @@ function App() {
       marginBottom: 24,
     },
     textarea: {
-      width: "100%",
+      width: "80vw",
       padding: "12px",
       background: "#ffffff10",
       border: "1px solid #00d4ff44",
@@ -201,8 +210,8 @@ function App() {
       display: "flex",
       alignItems: "center",
       gap: 12,
-      marginTop: 30,
-      marginBottom: 20,
+      marginTop: 10,
+      marginBottom: 10,
       flexWrap: "wrap",
     },
     input: {
@@ -240,9 +249,10 @@ function App() {
       transition: "all 0.2s",
     }),
     displayBox: {
+      position: "relative",
       width: "80vw",
       maxWidth: 1000,
-      margin: "40px auto",
+      margin: "10px auto",
       background: "#ffffff08",
       border: "1px solid #00d4ff22",
       borderRadius: 12,
@@ -299,25 +309,22 @@ function App() {
   };
 
   return (
-    <div>
-
-
-  
     <div style={styles.app}>
-      <div style={styles.title}>⚡ SPEED READER</div>
+      <div style={styles.content}>
+        <div style={styles.title}>⚡ SPEED READER</div>
 
-      <textarea
-        value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          handleReset();
-        }}
-        rows={5}
-        placeholder="Paste your text here..."
-        style={styles.textarea}
-      />
+        <textarea
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            handleReset();
+          }}
+          rows={5}
+          placeholder="Paste your text here..."
+          style={styles.textarea}
+        />
 
-      <div style={styles.controls}>
+        <div style={styles.controls}>
         <span style={styles.label}>WPM</span>
         <input
           type="number"
@@ -340,7 +347,7 @@ function App() {
         ))}
         <button style={styles.actionBtn("#ff00bf")} onClick={() => setWpm("400")}>ADHD MODE</button>
       </div>
-
+      
       <div style={styles.controls}>
         <button
           style={styles.actionBtn(isPlaying ? "#ffaa00" : "#00ff88")}
@@ -394,8 +401,8 @@ function App() {
       {/* ================= VERTICAL ================= */}
       {mode === "vertical" && (
         <div style={styles.displayBox}>
+          <div style={styles.centerLine(false)} />
           <div ref={containerRef} style={styles.displayInnerVertical(300)}>
-            <div style={styles.centerLine(false)} />
             <div
               ref={verticalScrollRef}
               style={{
@@ -426,7 +433,6 @@ function App() {
         <div style={styles.displayBox}>
           <div
             style={{
-              height: 160,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
