@@ -191,12 +191,15 @@ function App() {
       flex: 1,
     },
     title: {
-      fontSize: 36,
+      /* responsive size: min 24px, max 48px, scales with viewport width */
+      fontSize: "clamp(24px, 6vw, 48px)",
       fontWeight: "bold",
       letterSpacing: 4,
       color: "#00d4ff",
       textShadow: "0 0 20px #00d4ff88",
       marginBottom: 24,
+      textAlign: "center",
+      wordBreak: "break-word",
     },
     textarea: {
       width: "80vw",
