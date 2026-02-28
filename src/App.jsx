@@ -222,7 +222,7 @@ function App() {
       alignItems: "center",
       gap: 12,
       marginTop: 10,
-      marginBottom: 10,
+      marginBottom: 0,
       flexWrap: "wrap",
     },
     input: {
@@ -340,175 +340,185 @@ function App() {
         />
 
         <div style={styles.controls}>
-        <span style={styles.label}>WPM</span>
-        <input
-          type="number"
-          value={wpm}
-          onChange={(e) => setWpm(Number(e.target.value))}
-          style={styles.input}
-        />
+          <span style={styles.label}>WPM</span>
+          <input
+            type="number"
+            value={wpm}
+            onChange={(e) => setWpm(Number(e.target.value))}
+            style={styles.input}
+          />
 
-        {["horizontal", "vertical", "single"].map((m) => (
+          {["horizontal", "vertical", "single"].map((m) => (
+            <button
+              key={m}
+              style={styles.btn(mode === m)}
+              onClick={() => {
+                setMode(m);
+                handleReset();
+              }}
+            >
+              {m.toUpperCase()}
+            </button>
+          ))}
           <button
-            key={m}
-            style={styles.btn(mode === m)}
+            style={styles.actionBtn("#ff00bf")}
+            onClick={() => setWpm("400")}
+          >
+            ADHD MODE
+          </button>
+        </div>
+
+        <div style={styles.controls}>
+          <button
+            style={styles.actionBtn(isPlaying ? "#ffaa00" : "#00ff88")}
+            onClick={() => setIsPlaying((p) => !p)}
+          >
+            {isPlaying ? "⏸ PAUSE" : "▶ START"}
+          </button>
+          <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>
+            ↺ RESET
+          </button>
+          <button
+            style={styles.actionBtn("#888")}
             onClick={() => {
-              setMode(m);
+              setText("");
               handleReset();
             }}
           >
-            {m.toUpperCase()}
+            ✕ CLEAR
           </button>
-        ))}
-        <button style={styles.actionBtn("#ff00bf")} onClick={() => setWpm("400")}>ADHD MODE</button>
-      </div>
-      
-      <div style={styles.controls}>
-        <button
-          style={styles.actionBtn(isPlaying ? "#ffaa00" : "#00ff88")}
-          onClick={() => setIsPlaying((p) => !p)}
-        >
-          {isPlaying ? "⏸ PAUSE" : "▶ START"}
-        </button>
-        <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>
-          ↺ RESET
-        </button>
-        <button
-          style={styles.actionBtn("#888")}
-          onClick={() => {
-            setText("");
-            handleReset();
+        </div>
+
+        {/* ================= HORIZONTAL ================= */}
+        {mode === "horizontal" && (
+          <div style={styles.displayBox}>
+            <div ref={containerRef} style={styles.displayInnerHorizontal(120)}>
+              <div style={styles.centerLine(true)} />
+              <div
+                ref={scrollRef}
+                style={{
+                  display: "flex",
+                  gap: 40,
+                  alignItems: "center",
+                  paddingLeft: "50%",
+                  paddingRight: "50%",
+                }}
+              >
+                {words.map((word, i) => (
+                  <div
+                    key={i}
+                    ref={(el) => (wordRefs.current[i] = el)}
+                    style={wordStyle}
+                  >
+                    {word}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= VERTICAL ================= */}
+        {mode === "vertical" && (
+          <div style={styles.displayBox}>
+            <div style={styles.centerLine(false)} />
+            <div ref={containerRef} style={styles.displayInnerVertical(300)}>
+              <div
+                ref={verticalScrollRef}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 16,
+                  paddingTop: `${VERTICAL_PADDING}px`,
+                  paddingBottom: `${VERTICAL_PADDING}px`,
+                  transform: `translateY(${VERTICAL_PADDING}px)`,
+                }}
+              >
+                {words.map((word, i) => (
+                  <div
+                    key={i}
+                    ref={(el) => (verticalWordRefs.current[i] = el)}
+                    style={verticalWordStyle}
+                  >
+                    {word}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ================= SINGLE ================= */}
+        {mode === "single" && (
+          <div style={styles.displayBox}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 36,
+                  fontWeight: "bold",
+                  color: "#ffffff",
+                  letterSpacing: 2,
+                  opacity: fade ? 1 : 0,
+                  transition: "opacity 0.08s ease",
+                }}
+              >
+                {words[singleIndex]}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div
+          style={{
+            textAlign: "center",
+            color: "#ffffff99",
+            fontSize: 12,
+            marginTop: 20,
+            letterSpacing: 2,
           }}
         >
-          ✕ CLEAR
-        </button>
-      </div>
-
-      {/* ================= HORIZONTAL ================= */}
-      {mode === "horizontal" && (
-        <div style={styles.displayBox}>
-          <div ref={containerRef} style={styles.displayInnerHorizontal(120)}>
-            <div style={styles.centerLine(true)} />
-            <div
-              ref={scrollRef}
-              style={{
-                display: "flex",
-                gap: 40,
-                alignItems: "center",
-                paddingLeft: "50%",
-                paddingRight: "50%",
-              }}
-            >
-              {words.map((word, i) => (
-                <div
-                  key={i}
-                  ref={(el) => (wordRefs.current[i] = el)}
-                  style={wordStyle}
-                >
-                  {word}
-                </div>
-              ))}
-            </div>
-          </div>
+          {words.length > 0 &&
+            `${words.length} WORDS · EST. ${Math.round(words.length / wpm)}m READ TIME`}
         </div>
-      )}
 
-      {/* ================= VERTICAL ================= */}
-      {mode === "vertical" && (
-        <div style={styles.displayBox}>
-          <div style={styles.centerLine(false)} />
-          <div ref={containerRef} style={styles.displayInnerVertical(300)}>
-            <div
-              ref={verticalScrollRef}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 16,
-                paddingTop: `${VERTICAL_PADDING}px`,
-                paddingBottom: `${VERTICAL_PADDING}px`,
-                transform: `translateY(${VERTICAL_PADDING}px)`,
-              }}
-            >
-              {words.map((word, i) => (
-                <div
-                  key={i}
-                  ref={(el) => (verticalWordRefs.current[i] = el)}
-                  style={verticalWordStyle}
-                >
-                  {word}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= SINGLE ================= */}
-      {mode === "single" && (
-        <div style={styles.displayBox}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            gap: 0,
+          }}
+        >
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              textAlign: "center",
+              fontSize: "14px",
+              opacity: 0.6,
+              letterSpacing: "1px",
             }}
           >
-            <div
-              style={{
-                fontSize: 36,
-                fontWeight: "bold",
-                color: "#ffffff",
-                letterSpacing: 2,
-                opacity: fade ? 1 : 0,
-                transition: "opacity 0.08s ease",
-              }}
-            >
-              {words[singleIndex]}
-            </div>
+            ✦ Crafted by <strong>Sam V</strong> ✦
+          </div>
+          <div
+            style={{
+              textAlign: "center",
+              fontSize: "14px",
+              opacity: 0.6,
+              letterSpacing: "1px",
+            }}
+          >
+            ✦ Version <strong>3.2</strong> ✦
           </div>
         </div>
-      )}
-
-      <div
-        style={{
-          textAlign: "center",
-          color: "#ffffff99",
-          fontSize: 12,
-          marginTop: 20,
-          letterSpacing: 2,
-        }}
-      >
-        {words.length > 0 &&
-          `${words.length} WORDS · EST. ${Math.round(words.length / wpm)}m READ TIME`}
       </div>
-
-      <div
-        style={{
-          marginTop: "1px",
-          padding: "20px 0",
-          textAlign: "center",
-          fontSize: "14px",
-          opacity: 0.6,
-          letterSpacing: "1px",
-        }}
-      >
-        ✦ Crafted by <strong>Sam V</strong> ✦
-      </div>
-      <div
-        style={{
-          textAlign: "center",
-          fontSize: "14px",
-          opacity: 0.6,
-          letterSpacing: "1px",
-        }}
-      >
-        ✦ Version <strong>3.2</strong> ✦
-      </div>
-    </div>
     </div>
   );
-  
 }
-
 
 export default App;
