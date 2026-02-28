@@ -196,6 +196,7 @@ function App() {
     },
     textarea: {
       width: "80vw",
+      height: "10vw",
       padding: "12px",
       background: "#ffffff10",
       border: "1px solid #00d4ff44",
@@ -252,6 +253,7 @@ function App() {
       position: "relative",
       width: "80vw",
       maxWidth: 1000,
+      height: "20vh",
       margin: "10px auto",
       background: "#ffffff08",
       border: "1px solid #00d4ff22",
