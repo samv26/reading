@@ -1,7 +1,8 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import defaultText from "./assets/defaulttext";
 
 function App() {
-  const [text, setText] = useState("");
+  const [text, setText] = useState(defaultText);
   const [wpm, setWpm] = useState(200);
   const [mode, setMode] = useState("horizontal");
   const [isPlaying, setIsPlaying] = useState(false);
