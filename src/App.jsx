@@ -8,7 +8,10 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const words = useMemo(() => {
-    return text.trim().split(/\s+/).filter((w) => w.length > 0);
+    return text
+      .trim()
+      .split(/\s+/)
+      .filter((w) => w.length > 0);
   }, [text]);
 
   const msPerWord = wpm > 0 ? 60000 / wpm : 0;
@@ -81,11 +84,16 @@ function App() {
           scrollRef.current.style.transform = `translateX(${-offsetRef.current}px)`;
         }
         if (containerRef.current) {
-          const center = containerRef.current.offsetWidth / 2 + offsetRef.current;
-          let closest = 0, smallest = Infinity;
+          const center =
+            containerRef.current.offsetWidth / 2 + offsetRef.current;
+          let closest = 0,
+            smallest = Infinity;
           wordCenters.current.forEach((c, i) => {
             const diff = Math.abs(c - center);
-            if (diff < smallest) { smallest = diff; closest = i; }
+            if (diff < smallest) {
+              smallest = diff;
+              closest = i;
+            }
           });
           setCurrentHorizontalIndex(closest);
         }
@@ -97,11 +105,16 @@ function App() {
           verticalScrollRef.current.style.transform = `translateY(${-verticalOffsetRef.current}px)`;
         }
         if (containerRef.current) {
-          const center = containerRef.current.offsetHeight / 2 + verticalOffsetRef.current;
-          let closest = 0, smallest = Infinity;
+          const center =
+            containerRef.current.offsetHeight / 2 + verticalOffsetRef.current;
+          let closest = 0,
+            smallest = Infinity;
           verticalCenters.current.forEach((c, i) => {
             const diff = Math.abs(c - center);
-            if (diff < smallest) { smallest = diff; closest = i; }
+            if (diff < smallest) {
+              smallest = diff;
+              closest = i;
+            }
           });
           setCurrentVerticalIndex(closest);
         }
@@ -123,7 +136,7 @@ function App() {
     intervalRef.current = setInterval(() => {
       setFade(false);
       setTimeout(() => {
-        setSingleIndex((prev) => prev < words.length - 1 ? prev + 1 : prev);
+        setSingleIndex((prev) => (prev < words.length - 1 ? prev + 1 : prev));
         setFade(true);
       }, 80);
     }, msPerWord);
@@ -155,10 +168,17 @@ function App() {
   const styles = {
     app: {
       padding: "40px",
-      background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+      background:
+        "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
       color: "#e0e0ff",
       minHeight: "100vh",
       fontFamily: "'Courier New', monospace",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      overflow: "auto",
     },
     title: {
       fontSize: 36,
@@ -184,6 +204,7 @@ function App() {
       display: "flex",
       alignItems: "center",
       gap: 12,
+      marginTop: 30,
       marginBottom: 20,
       flexWrap: "wrap",
     },
@@ -249,8 +270,20 @@ function App() {
       position: "absolute",
       background: "#ffffff18",
       ...(horiz
-        ? { left: "50%", top: 0, bottom: 0, width: 2, transform: "translateX(-50%)" }
-        : { top: "50%", left: 0, right: 0, height: 2, transform: "translateY(-50%)" }),
+        ? {
+            left: "50%",
+            top: 0,
+            bottom: 0,
+            width: 2,
+            transform: "translateX(-50%)",
+          }
+        : {
+            top: "50%",
+            left: 0,
+            right: 0,
+            height: 2,
+            transform: "translateY(-50%)",
+          }),
     }),
   };
 
@@ -274,7 +307,10 @@ function App() {
 
       <textarea
         value={text}
-        onChange={(e) => { setText(e.target.value); handleReset(); }}
+        onChange={(e) => {
+          setText(e.target.value);
+          handleReset();
+        }}
         rows={5}
         placeholder="Paste your text here..."
         style={styles.textarea}
@@ -282,18 +318,47 @@ function App() {
 
       <div style={styles.controls}>
         <span style={styles.label}>WPM</span>
-        <input type="number" value={wpm} onChange={(e) => setWpm(Number(e.target.value))} style={styles.input} />
+        <input
+          type="number"
+          value={wpm}
+          onChange={(e) => setWpm(Number(e.target.value))}
+          style={styles.input}
+        />
 
         {["horizontal", "vertical", "single"].map((m) => (
-          <button key={m} style={styles.btn(mode === m)} onClick={() => { setMode(m); handleReset(); }}>
+          <button
+            key={m}
+            style={styles.btn(mode === m)}
+            onClick={() => {
+              setMode(m);
+              handleReset();
+            }}
+          >
             {m.toUpperCase()}
           </button>
         ))}
+        <button style={styles.actionBtn("#ff00bf")} onClick={() => setWpm("400")}>ADHD MODE</button>
+      </div>
 
-        <button style={styles.actionBtn("#00ff88")} onClick={() => setIsPlaying(true)}>▶ START</button>
-        <button style={styles.actionBtn("#ffaa00")} onClick={() => setIsPlaying(false)}>⏸ PAUSE</button>
-        <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>↺ RESET</button>
-        <button style={styles.actionBtn("#888")} onClick={() => { setText(""); handleReset(); }}>✕ CLEAR</button>
+      <div style={styles.controls}>
+        <button
+          style={styles.actionBtn(isPlaying ? "#ffaa00" : "#00ff88")}
+          onClick={() => setIsPlaying((p) => !p)}
+        >
+          {isPlaying ? "⏸ PAUSE" : "▶ START"}
+        </button>
+        <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>
+          ↺ RESET
+        </button>
+        <button
+          style={styles.actionBtn("#888")}
+          onClick={() => {
+            setText("");
+            handleReset();
+          }}
+        >
+          ✕ CLEAR
+        </button>
       </div>
 
       {/* ================= HORIZONTAL ================= */}
@@ -301,9 +366,22 @@ function App() {
         <div style={styles.displayBox}>
           <div ref={containerRef} style={styles.displayInnerHorizontal(120)}>
             <div style={styles.centerLine(true)} />
-            <div ref={scrollRef} style={{ display: "flex", gap: 40, alignItems: "center", paddingLeft: "50%", paddingRight: "50%" }}>
+            <div
+              ref={scrollRef}
+              style={{
+                display: "flex",
+                gap: 40,
+                alignItems: "center",
+                paddingLeft: "50%",
+                paddingRight: "50%",
+              }}
+            >
               {words.map((word, i) => (
-                <div key={i} ref={(el) => (wordRefs.current[i] = el)} style={wordStyle}>
+                <div
+                  key={i}
+                  ref={(el) => (wordRefs.current[i] = el)}
+                  style={wordStyle}
+                >
                   {word}
                 </div>
               ))}
@@ -329,7 +407,11 @@ function App() {
               }}
             >
               {words.map((word, i) => (
-                <div key={i} ref={(el) => (verticalWordRefs.current[i] = el)} style={verticalWordStyle}>
+                <div
+                  key={i}
+                  ref={(el) => (verticalWordRefs.current[i] = el)}
+                  style={verticalWordStyle}
+                >
                   {word}
                 </div>
               ))}
@@ -341,47 +423,65 @@ function App() {
       {/* ================= SINGLE ================= */}
       {mode === "single" && (
         <div style={styles.displayBox}>
-          <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div style={{
-              fontSize: 36,
-              fontWeight: "bold",
-              color: "#ffffff",
-              letterSpacing: 2,
-              opacity: fade ? 1 : 0,
-              transition: "opacity 0.08s ease",
-            }}>
+          <div
+            style={{
+              height: 160,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 36,
+                fontWeight: "bold",
+                color: "#ffffff",
+                letterSpacing: 2,
+                opacity: fade ? 1 : 0,
+                transition: "opacity 0.08s ease",
+              }}
+            >
               {words[singleIndex]}
             </div>
           </div>
         </div>
       )}
 
-      <div style={{ textAlign: "center", color: "#ffffff99", fontSize: 12, marginTop: 20, letterSpacing: 2 }}>
-        {words.length > 0 && `${words.length} WORDS · EST. ${Math.round(words.length / wpm)}m READ TIME`}
+      <div
+        style={{
+          textAlign: "center",
+          color: "#ffffff99",
+          fontSize: 12,
+          marginTop: 20,
+          letterSpacing: 2,
+        }}
+      >
+        {words.length > 0 &&
+          `${words.length} WORDS · EST. ${Math.round(words.length / wpm)}m READ TIME`}
       </div>
 
-      <div style={{
-  marginTop: "1px",
-  padding: "20px 0",
-  textAlign: "center",
-  fontSize: "14px",
-  opacity: 0.6,
-  letterSpacing: "1px"
-}}>
-  ✦ Crafted by <strong>Sam V</strong> ✦
-  
-</div>
-<div style={{
-
-  textAlign: "center",
-  fontSize: "14px",
-  opacity: 0.6,
-  letterSpacing: "1px"
-}}>
-  ✦ Version <strong>3.2</strong> ✦
-  
-</div>
-
+      <div
+        style={{
+          marginTop: "1px",
+          padding: "20px 0",
+          textAlign: "center",
+          fontSize: "14px",
+          opacity: 0.6,
+          letterSpacing: "1px",
+        }}
+      >
+        ✦ Crafted by <strong>Sam V</strong> ✦
+      </div>
+      <div
+        style={{
+          textAlign: "center",
+          fontSize: "14px",
+          opacity: 0.6,
+          letterSpacing: "1px",
+        }}
+      >
+        ✦ Version <strong>3.2</strong> ✦
+      </div>
     </div>
   );
 }
