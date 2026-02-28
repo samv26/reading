@@ -343,7 +343,7 @@ function App() {
         <div style={styles.displayBox}>
           <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <div style={{
-              fontSize: 40,
+              fontSize: 36,
               fontWeight: "bold",
               color: "#ffffff",
               letterSpacing: 2,
@@ -369,7 +369,19 @@ function App() {
   letterSpacing: "1px"
 }}>
   ✦ Crafted by <strong>Sam V</strong> ✦
+  
 </div>
+<div style={{
+
+  textAlign: "center",
+  fontSize: "14px",
+  opacity: 0.6,
+  letterSpacing: "1px"
+}}>
+  ✦ Version <strong>3.2</strong> ✦
+  
+</div>
+
     </div>
   );
 }
