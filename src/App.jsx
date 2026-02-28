@@ -235,6 +235,17 @@ function App() {
       fontSize: 14,
       outline: "none",
     },
+    slider: {
+      flex: 1,
+      minWidth: 120,
+      padding: "6px 8px",
+      background: "#ffffff10",
+      border: "1px solid #00d4ff44",
+      borderRadius: 6,
+      outline: "none",
+      appearance: "none",
+      height: 8,
+    },
     label: { fontSize: 13, color: "#00d4ffaa", marginRight: 4 },
     btn: (active) => ({
       padding: "8px 18px",
@@ -342,11 +353,14 @@ function App() {
         <div style={styles.controls}>
           <span style={styles.label}>WPM</span>
           <input
-            type="number"
+            type="range"
+            min={50}
+            max={700}
             value={wpm}
             onChange={(e) => setWpm(Number(e.target.value))}
-            style={styles.input}
+            style={styles.slider}
           />
+          <span style={{ ...styles.label, minWidth: 56, textAlign: "right" }}>{wpm}</span>
 
           {["horizontal", "vertical", "single"].map((m) => (
             <button
@@ -479,7 +493,6 @@ function App() {
             textAlign: "center",
             color: "#ffffff99",
             fontSize: 12,
-            marginTop: 0,
             letterSpacing: 2,
           }}
         >
