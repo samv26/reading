@@ -176,7 +176,10 @@ function App() {
       overflow: "auto",
     },
     content: {
-      height: "80vh",
+      /* vh units are unreliable on mobile; they can compute to 0 when the
+         browser chrome is shown/hidden. use minHeight so the container never
+         collapses completely and fall back to flex growth instead. */
+      minHeight: "80vh",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
@@ -185,6 +188,7 @@ function App() {
       width: "80vw",
       maxWidth: 1000,
       margin: "0 auto",
+      flex: 1,
     },
     title: {
       fontSize: 36,
@@ -196,7 +200,10 @@ function App() {
     },
     textarea: {
       width: "80vw",
-      height: "10vw",
+      /* rely on rows and a minimum height instead of viewport units – some
+         mobile browsers report a 0px viewport during initial load which made
+         the textarea collapse. */
+      minHeight: 120,
       padding: "12px",
       background: "#ffffff10",
       border: "1px solid #00d4ff44",
@@ -253,7 +260,10 @@ function App() {
       position: "relative",
       width: "80vw",
       maxWidth: 1000,
-      height: "20vh",
+      /* don't use vh for a height – mobile viewports can return 0 during
+         initial layout. let the box size to its contents and give a weak
+         minimum so it never disappears entirely. */
+      minHeight: 60,
       margin: "10px auto",
       background: "#ffffff08",
       border: "1px solid #00d4ff22",
