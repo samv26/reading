@@ -1,43 +1,28 @@
-import { useState } from 'react'
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 
 function App() {
   const [text, setText] = useState("");
   const [wpm, setWpm] = useState(200);
-  const [mode, setMode] = useState("scroll"); // "scroll", "single", or "vertical"
+  const [mode, setMode] = useState("horizontal");
   const [isPlaying, setIsPlaying] = useState(false);
-
-  // Scroll mode state
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-
-  // Vertical scroll mode state
-  const verticalScrollRef = useRef(null);
-  const verticalOffsetRef = useRef(0);
-  const verticalWordRefs = useRef([]);
-  const verticalWordCenters = useRef([]);
-  const [currentVerticalWordIndex, setCurrentVerticalWordIndex] = useState(0);
-
-  // Single word mode state
-  const [singleIndex, setSingleIndex] = useState(0);
-  const [fade, setFade] = useState(true);
-
-  const animationRef = useRef(null);
-  const lastTimeRef = useRef(null);
-  const intervalRef = useRef(null);
-  const containerRef = useRef(null);
-  const scrollRef = useRef(null);       // ref to the inner scrolling div
-  const offsetRef = useRef(0);          // raw offset value, NOT state
-  const wordRefs = useRef([]);
-  const wordCenters = useRef([]);
 
   const words = useMemo(() => {
     return text.trim().split(/\s+/).filter((w) => w.length > 0);
   }, [text]);
 
   const msPerWord = wpm > 0 ? 60000 / wpm : 0;
-  const pixelsPerMs = msPerWord > 0 ? 120 / msPerWord : 0;
 
-  /* ---------------- SCROLL MODE ---------------- */
+  const containerRef = useRef(null);
+  const animationRef = useRef(null);
+  const lastTimeRef = useRef(null);
+
+  /* ---------------- HORIZONTAL ---------------- */
+  const scrollRef = useRef(null);
+  const offsetRef = useRef(0);
+  const wordRefs = useRef([]);
+  const wordCenters = useRef([]);
+  const [currentHorizontalIndex, setCurrentHorizontalIndex] = useState(0);
+  const horizontalSpeed = msPerWord > 0 ? 120 / msPerWord : 0;
 
   useLayoutEffect(() => {
     let cumulative = 0;
@@ -51,9 +36,18 @@ function App() {
     });
   }, [words]);
 
+  /* ---------------- VERTICAL ---------------- */
+  const VERTICAL_PADDING = 150;
+  const verticalScrollRef = useRef(null);
+  const verticalOffsetRef = useRef(-VERTICAL_PADDING);
+  const verticalWordRefs = useRef([]);
+  const verticalCenters = useRef([]);
+  const [currentVerticalIndex, setCurrentVerticalIndex] = useState(0);
+  const verticalSpeed = msPerWord > 0 ? 70 / msPerWord : 0;
+
   useLayoutEffect(() => {
     let cumulative = 0;
-    verticalWordCenters.current = words.map((_, i) => {
+    verticalCenters.current = words.map((_, i) => {
       const el = verticalWordRefs.current[i];
       if (!el) return 0;
       const height = el.offsetHeight;
@@ -63,46 +57,14 @@ function App() {
     });
   }, [words]);
 
+  /* ---------------- SINGLE ---------------- */
+  const [singleIndex, setSingleIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+  const intervalRef = useRef(null);
+
+  /* ================= ANIMATION ENGINE ================= */
   useEffect(() => {
-    if (!isPlaying || mode !== "scroll") {
-      cancelAnimationFrame(animationRef.current);
-      return;
-    }
-    const animate = (time) => {
-      if (!lastTimeRef.current) lastTimeRef.current = time;
-      const delta = time - lastTimeRef.current;
-      lastTimeRef.current = time;
-
-      offsetRef.current += delta * pixelsPerMs;
-
-      // Directly mutate the DOM — no React re-render
-      if (scrollRef.current) {
-        scrollRef.current.style.transform = `translateX(${-offsetRef.current}px)`;
-      }
-
-      // Only update word index state (cheap check, infrequent state change)
-      if (containerRef.current) {
-        const containerCenter = containerRef.current.offsetWidth / 2 + offsetRef.current;
-        let closest = 0, smallestDiff = Infinity;
-        wordCenters.current.forEach((center, index) => {
-          const diff = Math.abs(center - containerCenter);
-          if (diff < smallestDiff) { smallestDiff = diff; closest = index; }
-        });
-        setCurrentWordIndex(closest);
-      }
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animationRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationRef.current);
-  }, [isPlaying, pixelsPerMs, mode]);
-
-  // Vertical pixels per ms (same speed logic but vertical)
-  const verticalPixelsPerMs = msPerWord > 0 ? 60 / msPerWord : 0;
-
-  useEffect(() => {
-    if (!isPlaying || mode !== "vertical") {
+    if (!isPlaying) {
       cancelAnimationFrame(animationRef.current);
       return;
     }
@@ -112,20 +74,36 @@ function App() {
       const delta = time - lastTimeRef.current;
       lastTimeRef.current = time;
 
-      verticalOffsetRef.current += delta * verticalPixelsPerMs;
-
-      if (verticalScrollRef.current) {
-        verticalScrollRef.current.style.transform = `translateY(${-verticalOffsetRef.current}px)`;
+      if (mode === "horizontal") {
+        offsetRef.current += delta * horizontalSpeed;
+        if (scrollRef.current) {
+          scrollRef.current.style.transform = `translateX(${-offsetRef.current}px)`;
+        }
+        if (containerRef.current) {
+          const center = containerRef.current.offsetWidth / 2 + offsetRef.current;
+          let closest = 0, smallest = Infinity;
+          wordCenters.current.forEach((c, i) => {
+            const diff = Math.abs(c - center);
+            if (diff < smallest) { smallest = diff; closest = i; }
+          });
+          setCurrentHorizontalIndex(closest);
+        }
       }
 
-      if (containerRef.current) {
-        const containerCenter = containerRef.current.offsetHeight / 2 + verticalOffsetRef.current;
-        let closest = 0, smallestDiff = Infinity;
-        verticalWordCenters.current.forEach((center, index) => {
-          const diff = Math.abs(center - containerCenter);
-          if (diff < smallestDiff) { smallestDiff = diff; closest = index; }
-        });
-        setCurrentVerticalWordIndex(closest);
+      if (mode === "vertical") {
+        verticalOffsetRef.current += delta * verticalSpeed;
+        if (verticalScrollRef.current) {
+          verticalScrollRef.current.style.transform = `translateY(${-verticalOffsetRef.current}px)`;
+        }
+        if (containerRef.current) {
+          const center = containerRef.current.offsetHeight / 2 + verticalOffsetRef.current;
+          let closest = 0, smallest = Infinity;
+          verticalCenters.current.forEach((c, i) => {
+            const diff = Math.abs(c - center);
+            if (diff < smallest) { smallest = diff; closest = i; }
+          });
+          setCurrentVerticalIndex(closest);
+        }
       }
 
       animationRef.current = requestAnimationFrame(animate);
@@ -133,243 +111,255 @@ function App() {
 
     animationRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationRef.current);
-  }, [isPlaying, verticalPixelsPerMs, mode]);
+  }, [isPlaying, mode, horizontalSpeed, verticalSpeed]);
 
-  /* ---------------- SINGLE WORD MODE ---------------- */
-
+  /* ---------------- SINGLE MODE ---------------- */
   useEffect(() => {
     if (!isPlaying || mode !== "single") {
       clearInterval(intervalRef.current);
       return;
     }
-
     intervalRef.current = setInterval(() => {
       setFade(false);
       setTimeout(() => {
-        setSingleIndex((prev) => {
-          if (prev >= words.length - 1) return prev;
-          return prev + 1;
-        });
+        setSingleIndex((prev) => prev < words.length - 1 ? prev + 1 : prev);
         setFade(true);
-      }, 100);
+      }, 80);
     }, msPerWord);
-
     return () => clearInterval(intervalRef.current);
-  }, [isPlaying, msPerWord, words.length, mode]);
+  }, [isPlaying, mode, msPerWord, words.length]);
 
   /* ---------------- CONTROLS ---------------- */
-
-  const handleStart = () => {
-    if (words.length === 0) return;
-    setIsPlaying(true);
-  };
-
-  const handlePause = () => setIsPlaying(false);
-
   const handleReset = () => {
     setIsPlaying(false);
     offsetRef.current = 0;
-    verticalOffsetRef.current = 0;
-    if (scrollRef.current) scrollRef.current.style.transform = `translateX(0px)`;
-    if (verticalScrollRef.current) verticalScrollRef.current.style.transform = `translateY(0px)`;
+    verticalOffsetRef.current = -VERTICAL_PADDING;
+
+    if (scrollRef.current)
+      scrollRef.current.style.transform = "translateX(0px)";
+    if (verticalScrollRef.current)
+      verticalScrollRef.current.style.transform = `translateY(${VERTICAL_PADDING}px)`;
+
+    setCurrentHorizontalIndex(0);
+    setCurrentVerticalIndex(0);
     setSingleIndex(0);
-    setCurrentWordIndex(0);
-    setCurrentVerticalWordIndex(0);
     lastTimeRef.current = null;
+    wordRefs.current = [];
+    verticalWordRefs.current = [];
+    wordCenters.current = [];
+    verticalCenters.current = [];
   };
 
-  /* ---------------- UI ---------------- */
+  /* ================= STYLES ================= */
+  const styles = {
+    app: {
+      padding: "40px",
+      background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+      color: "#e0e0ff",
+      minHeight: "100vh",
+      fontFamily: "'Courier New', monospace",
+    },
+    title: {
+      fontSize: 36,
+      fontWeight: "bold",
+      letterSpacing: 4,
+      color: "#00d4ff",
+      textShadow: "0 0 20px #00d4ff88",
+      marginBottom: 24,
+    },
+    textarea: {
+      width: "100%",
+      padding: "12px",
+      background: "#ffffff10",
+      border: "1px solid #00d4ff44",
+      borderRadius: 8,
+      color: "#e0e0ff",
+      fontSize: 14,
+      resize: "vertical",
+      outline: "none",
+      marginBottom: 8,
+    },
+    controls: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      marginBottom: 20,
+      flexWrap: "wrap",
+    },
+    input: {
+      width: 80,
+      padding: "8px 12px",
+      background: "#ffffff10",
+      border: "1px solid #00d4ff44",
+      borderRadius: 6,
+      color: "#e0e0ff",
+      fontSize: 14,
+      outline: "none",
+    },
+    label: { fontSize: 13, color: "#00d4ffaa", marginRight: 4 },
+    btn: (active) => ({
+      padding: "8px 18px",
+      background: active ? "#00d4ff22" : "transparent",
+      border: `1px solid ${active ? "#00d4ff" : "#00d4ff44"}`,
+      borderRadius: 6,
+      color: active ? "#00d4ff" : "#e0e0ffaa",
+      fontSize: 13,
+      cursor: "pointer",
+      letterSpacing: 1,
+      transition: "all 0.2s",
+    }),
+    actionBtn: (color) => ({
+      padding: "10px 24px",
+      background: `${color}22`,
+      border: `1px solid ${color}`,
+      borderRadius: 6,
+      color: color,
+      fontSize: 14,
+      fontWeight: "bold",
+      cursor: "pointer",
+      letterSpacing: 2,
+      transition: "all 0.2s",
+    }),
+    displayBox: {
+      width: "60vw",
+      maxWidth: 700,
+      margin: "40px auto",
+      background: "#ffffff08",
+      border: "1px solid #00d4ff22",
+      borderRadius: 12,
+      overflow: "hidden",
+      boxShadow: "0 0 40px #00d4ff11",
+    },
+    displayInnerVertical: (height) => ({
+      height,
+      display: "flex",
+      justifyContent: "center",
+      overflow: "hidden",
+      position: "relative",
+    }),
+    displayInnerHorizontal: (height) => ({
+      height,
+      display: "flex",
+      alignItems: "center",
+      overflow: "hidden",
+      position: "relative",
+    }),
+    centerLine: (horiz) => ({
+      position: "absolute",
+      background: "#ffffff18",
+      ...(horiz
+        ? { left: "50%", top: 0, bottom: 0, width: 2, transform: "translateX(-50%)" }
+        : { top: "50%", left: 0, right: 0, height: 2, transform: "translateY(-50%)" }),
+    }),
+  };
+
+  const wordStyle = {
+    fontSize: 28,
+    fontWeight: "normal",
+    color: "#ffffff",
+    whiteSpace: "nowrap",
+  };
+
+  const verticalWordStyle = {
+    fontSize: 28,
+    fontWeight: "normal",
+    color: "#ffffff",
+    textAlign: "center",
+  };
 
   return (
-    <div
-      style={{
-        padding: "40px",
-        fontFamily: "Arial, sans-serif",
-        backgroundColor: "#f8a014",
-        color: "#fff",
-        minHeight: "100vh",
-      }}
-    >
-      <h1>Speed Reader</h1>
+    <div style={styles.app}>
+      <div style={styles.title}>⚡ SPEED READER</div>
 
       <textarea
-        placeholder="Paste your text here..."
         value={text}
-        onChange={(e) => {
-          setText(e.target.value);
-          handleReset();
-        }}
+        onChange={(e) => { setText(e.target.value); handleReset(); }}
         rows={5}
-        style={{
-          width: "100%",
-          padding: "10px",
-          fontSize: "16px",
-          backgroundColor: "#f6d500",
-          color: "#fff",
-          border: "1px solid #444",
-          marginBottom: "20px",
-        }}
+        placeholder="Paste your text here..."
+        style={styles.textarea}
       />
 
-      <div style={{ marginBottom: "20px" }}>
-        <label>
-          WPM:
-          <input
-            type="number"
-            value={wpm}
-            onChange={(e) => setWpm(Number(e.target.value))}
-            style={{ marginLeft: "10px", width: "80px" }}
-          />
-        </label>
+      <div style={styles.controls}>
+        <span style={styles.label}>WPM</span>
+        <input type="number" value={wpm} onChange={(e) => setWpm(Number(e.target.value))} style={styles.input} />
 
-        <button onClick={() => setMode("scroll")} style={{ marginLeft: 20 }}>
-          Scrolling Mode
-        </button>
-        <button onClick={() => setMode("single")} style={{ marginLeft: 10 }}>
-          Single Word Mode
-        </button>
-        <button onClick={() => setMode("vertical")} style={{ marginLeft: 10 }}>
-          Vertical Scroll Mode
-        </button>
+        {["horizontal", "vertical", "single"].map((m) => (
+          <button key={m} style={styles.btn(mode === m)} onClick={() => { setMode(m); handleReset(); }}>
+            {m.toUpperCase()}
+          </button>
+        ))}
+
+        <button style={styles.actionBtn("#00ff88")} onClick={() => setIsPlaying(true)}>▶ START</button>
+        <button style={styles.actionBtn("#ffaa00")} onClick={() => setIsPlaying(false)}>⏸ PAUSE</button>
+        <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>↺ RESET</button>
+        <button style={styles.actionBtn("#888")} onClick={() => { setText(""); handleReset(); }}>✕ CLEAR</button>
       </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        {!isPlaying ? (
-          <button onClick={handleStart} style={{ marginRight: "10px" }}>
-            Start
-          </button>
-        ) : (
-          <button onClick={handlePause} style={{ marginRight: "10px" }}>
-            Pause
-          </button>
-        )}
-        <button onClick={handleReset}>Reset</button>
-      </div>
-
-      {/* ------------ DISPLAY AREA ------------ */}
-
-      {mode === "scroll" && (
-        <div
-          ref={containerRef}
-          style={{
-            width: "40vw",
-            height: "120px",
-            margin: "60px auto",
-            overflow: "hidden",
-            display: "flex",
-            alignItems: "center",
-            borderTop: "1px solid #333",
-            borderBottom: "1px solid #333",
-          }}
-        >
-          <div
-            ref={scrollRef}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "40px",
-              willChange: "transform",
-            }}
-          >
-            {words.map((word, index) => (
-              <div
-                key={index}
-                ref={(el) => (wordRefs.current[index] = el)}
-                style={{
-                  fontSize: "28px",
-                  whiteSpace: "nowrap",
-                  color: "#ffffff",
-                  opacity: index === currentWordIndex ? 1 : 0.35,
-                  transition: "opacity 0.2s ease",
-                }}
-              >
-                {word}
-              </div>
-            ))}
+      {/* ================= HORIZONTAL ================= */}
+      {mode === "horizontal" && (
+        <div style={styles.displayBox}>
+          <div ref={containerRef} style={styles.displayInnerHorizontal(120)}>
+            <div style={styles.centerLine(true)} />
+            <div ref={scrollRef} style={{ display: "flex", gap: 40, alignItems: "center", paddingLeft: "50%", paddingRight: "50%" }}>
+              {words.map((word, i) => (
+                <div key={i} ref={(el) => (wordRefs.current[i] = el)} style={wordStyle}>
+                  {word}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {mode === "single" && (
-        <div
-          style={{
-            width: "40vw",
-            height: "120px",
-            margin: "60px auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderTop: "1px solid #333",
-            borderBottom: "1px solid #333",
-            fontSize: "48px",
-            fontWeight: "bold",
-            opacity: fade ? 1 : 0,
-            transition: "opacity 0.25s ease",
-          }}
-        >
-          {words[singleIndex]}
-        </div>
-      )}
-
+      {/* ================= VERTICAL ================= */}
       {mode === "vertical" && (
-        <div
-          ref={containerRef}
-          style={{
-            width: "40vw",
-            height: "300px",
-            margin: "60px auto",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            borderTop: "1px solid #333",
-            borderBottom: "1px solid #333",
-            position: "relative",
-          }}
-        >
-          {/* fade gradients top and bottom */}
-          <div style={{
-            position: "absolute", top: 0, left: 0, right: 0, height: "80px",
-            background: "linear-gradient(to bottom, #f8a014, transparent)",
-            zIndex: 1, pointerEvents: "none",
-          }} />
-          <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: "80px",
-            background: "linear-gradient(to top, #f8a014, transparent)",
-            zIndex: 1, pointerEvents: "none",
-          }} />
-          <div
-            ref={verticalScrollRef}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "16px",
-              willChange: "transform",
-              paddingTop: "140px",
-            }}
-          >
-            {words.map((word, index) => (
-              <div
-                key={index}
-                ref={(el) => (verticalWordRefs.current[index] = el)}
-                style={{
-                  fontSize: "28px",
-                  whiteSpace: "nowrap",
-                  color: "#ffffff",
-                  opacity: index === currentVerticalWordIndex ? 1 : 0.3,
-                  transform: index === currentVerticalWordIndex ? "scale(1.15)" : "scale(1)",
-                  transition: "opacity 0.2s ease, transform 0.2s ease",
-                }}
-              >
-                {word}
-              </div>
-            ))}
+        <div style={styles.displayBox}>
+          <div ref={containerRef} style={styles.displayInnerVertical(300)}>
+            <div style={styles.centerLine(false)} />
+            <div
+              ref={verticalScrollRef}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+                paddingTop: `${VERTICAL_PADDING}px`,
+                paddingBottom: `${VERTICAL_PADDING}px`,
+                transform: `translateY(${VERTICAL_PADDING}px)`,
+              }}
+            >
+              {words.map((word, i) => (
+                <div key={i} ref={(el) => (verticalWordRefs.current[i] = el)} style={verticalWordStyle}>
+                  {word}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
+
+      {/* ================= SINGLE ================= */}
+      {mode === "single" && (
+        <div style={styles.displayBox}>
+          <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{
+              fontSize: 52,
+              fontWeight: "bold",
+              color: "#ffffff",
+              letterSpacing: 2,
+              opacity: fade ? 1 : 0,
+              transition: "opacity 0.08s ease",
+            }}>
+              {words[singleIndex]}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ textAlign: "center", color: "#ffffff33", fontSize: 12, marginTop: 20, letterSpacing: 2 }}>
+        {words.length > 0 && `${words.length} WORDS · EST. ${Math.round(words.length / wpm)}m READ TIME`}
+      </div>
     </div>
   );
 }
 
-export default App
+export default App;
