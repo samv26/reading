@@ -356,12 +356,12 @@ function App() {
         </div>
       )}
 
-      <div style={{ textAlign: "center", color: "#ffffff33", fontSize: 12, marginTop: 20, letterSpacing: 2 }}>
+      <div style={{ textAlign: "center", color: "#ffffff99", fontSize: 12, marginTop: 20, letterSpacing: 2 }}>
         {words.length > 0 && `${words.length} WORDS · EST. ${Math.round(words.length / wpm)}m READ TIME`}
       </div>
 
       <div style={{
-  marginTop: "60px",
+  marginTop: "1px",
   padding: "20px 0",
   textAlign: "center",
   fontSize: "14px",
