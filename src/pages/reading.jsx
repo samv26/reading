@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
+import Navigation from "../components/navigation";
 import defaultText from "../assets/defaulttext";
 
 function Reading() {
@@ -531,26 +532,7 @@ function Reading() {
           </div>
         </div>
 
-        {/* link button to six page */}
-        <Link
-          to="/six"
-          style={{
-            position: "fixed",
-            right: 20,
-            bottom: 20,
-            padding: "12px 18px",
-            background: "#00d4ff22",
-            border: "1px solid #00d4ff",
-            borderRadius: 6,
-            color: "#00d4ff",
-            fontSize: 14,
-            textDecoration: "none",
-            fontWeight: "bold",
-            boxShadow: "0 0 10px #00d4ff55",
-          }}
-        >
-          SIX DIGIT
-        </Link>
+        <Navigation />
       </div>
     </div>
   );

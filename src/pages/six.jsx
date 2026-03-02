@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import Navigation from "../components/navigation";
 
 export default function six() {
+  const navigate = useNavigate();
   const [number, setNumber] = useState("");
   const [visible, setVisible] = useState(false);
   const [input, setInput] = useState("");
@@ -85,6 +88,9 @@ export default function six() {
               Next
             </button>
           )}
+          <button style={styles.button} onClick={() => navigate("/sequence")}>
+            Sequence
+          </button>
         </div>
 
         <div style={styles.form}>
@@ -153,6 +159,7 @@ export default function six() {
           />
         </div>
       </div>
+      <Navigation />
     </div>
   );
 }
