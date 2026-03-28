@@ -352,60 +352,7 @@ function Reading() {
           style={styles.textarea}
         />
 
-        <div style={styles.controls}>
-          <span style={styles.label}>WPM</span>
-          <input
-            type="range"
-            min={50}
-            max={700}
-            value={wpm}
-            onChange={(e) => setWpm(Number(e.target.value))}
-            style={styles.slider}
-          />
-          <span style={{ ...styles.label, minWidth: 56, textAlign: "right" }}>{wpm}</span>
-
-          {["horizontal", "vertical", "single"].map((m) => (
-            <button
-              key={m}
-              style={styles.btn(mode === m)}
-              onClick={() => {
-                setMode(m);
-                handleReset();
-              }}
-            >
-              {m.toUpperCase()}
-            </button>
-          ))}
-          <button
-            style={styles.actionBtn("#ff00bf")}
-            onClick={() => setWpm("400")}
-          >
-            ADHD MODE
-          </button>
-        </div>
-
-        <div style={styles.controls}>
-          <button
-            style={styles.actionBtn(isPlaying ? "#ffaa00" : "#00ff88")}
-            onClick={() => setIsPlaying((p) => !p)}
-          >
-            {isPlaying ? "⏸ PAUSE" : "▶ START"}
-          </button>
-          <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>
-            ↺ RESET
-          </button>
-          <button
-            style={styles.actionBtn("#888")}
-            onClick={() => {
-              setText("");
-              handleReset();
-            }}
-          >
-            ✕ CLEAR
-          </button>
-        </div>
-
-        {/* ================= HORIZONTAL ================= */}
+          {/* ================= HORIZONTAL ================= */}
         {mode === "horizontal" && (
           <div style={styles.displayBox}>
             <div ref={containerRef} style={styles.displayInnerHorizontal(120)}>
@@ -490,6 +437,61 @@ function Reading() {
           </div>
         )}
 
+
+        <div style={styles.controls}>
+          <span style={styles.label}>WPM</span>
+          <input
+            type="range"
+            min={50}
+            max={700}
+            value={wpm}
+            onChange={(e) => setWpm(Number(e.target.value))}
+            style={styles.slider}
+          />
+          <span style={{ ...styles.label, minWidth: 56, textAlign: "right" }}>{wpm}</span>
+
+          {["horizontal", "vertical", "single"].map((m) => (
+            <button
+              key={m}
+              style={styles.btn(mode === m)}
+              onClick={() => {
+                setMode(m);
+                handleReset();
+              }}
+            >
+              {m.toUpperCase()}
+            </button>
+          ))}
+          <button
+            style={styles.actionBtn("#ff00bf")}
+            onClick={() => setWpm("400")}
+          >
+            ADHD MODE
+          </button>
+        </div>
+
+        <div style={styles.controls}>
+          <button
+            style={styles.actionBtn(isPlaying ? "#ffaa00" : "#00ff88")}
+            onClick={() => setIsPlaying((p) => !p)}
+          >
+            {isPlaying ? "⏸ PAUSE" : "▶ START"}
+          </button>
+          <button style={styles.actionBtn("#ff4466")} onClick={handleReset}>
+            ↺ RESET
+          </button>
+          <button
+            style={styles.actionBtn("#888")}
+            onClick={() => {
+              setText("");
+              handleReset();
+            }}
+          >
+            ✕ CLEAR
+          </button>
+        </div>
+
+      
         <div
           style={{
             textAlign: "center",
