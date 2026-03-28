@@ -317,6 +317,34 @@ function Reading() {
   const animationRef = useRef(null);
   const lastTimeRef = useRef(null);
 
+
+  /* ---------------- PIVOT LOGIC ---------------- */
+  const getPivotIndex = (word) => {
+    const len = word.length;
+    if (len <= 1) return 0;
+    if (len <= 5) return 1;
+    if (len <= 9) return 2;
+    if (len <= 13) return 3;
+    return 4;
+  };
+
+  const renderPivotWord = (word) => {
+    if (!word) return null;
+
+    const pivotIndex = getPivotIndex(word);
+    const left = word.slice(0, pivotIndex);
+    const pivot = word[pivotIndex];
+    const right = word.slice(pivotIndex + 1);
+
+    return (
+      <span style={{ display: "flex", width: "100%", alignItems: "center" }}>
+        <span style={{ flex: 1, textAlign: "right" }}>{left}</span>
+        <span style={{ color: "red", fontWeight: 800 }}>{pivot}</span>
+        <span style={{ flex: 1, textAlign: "left" }}>{right}</span>
+      </span>
+    );
+  };
+
   /* ---------------- HORIZONTAL ---------------- */
   const scrollRef = useRef(null);
   const offsetRef = useRef(0);
@@ -358,9 +386,11 @@ function Reading() {
     });
   }, [words]);
 
+ 
   /* ---------------- SINGLE ---------------- */
   const [singleIndex, setSingleIndex] = useState(0);
   const [fade, setFade] = useState(true);
+  const [fadeEnabled, setFadeEnabled] = useState(false);
   const intervalRef = useRef(null);
 
   /* ================= ANIMATION ENGINE ================= */
@@ -376,13 +406,16 @@ function Reading() {
         offsetRef.current += delta * horizontalSpeed;
         if (scrollRef.current)
           scrollRef.current.style.transform = `translateX(${-offsetRef.current}px)`;
+
         if (containerRef.current) {
           const center = containerRef.current.offsetWidth / 2 + offsetRef.current;
           let closest = 0, smallest = Infinity;
+
           wordCenters.current.forEach((c, i) => {
             const diff = Math.abs(c - center);
             if (diff < smallest) { smallest = diff; closest = i; }
           });
+
           setCurrentHorizontalIndex(closest);
         }
       }
@@ -391,13 +424,16 @@ function Reading() {
         verticalOffsetRef.current += delta * verticalSpeed;
         if (verticalScrollRef.current)
           verticalScrollRef.current.style.transform = `translateY(${-verticalOffsetRef.current}px)`;
+
         if (containerRef.current) {
           const center = containerRef.current.offsetHeight / 2 + verticalOffsetRef.current;
           let closest = 0, smallest = Infinity;
+
           verticalCenters.current.forEach((c, i) => {
             const diff = Math.abs(c - center);
             if (diff < smallest) { smallest = diff; closest = i; }
           });
+
           setCurrentVerticalIndex(closest);
         }
       }
@@ -412,27 +448,36 @@ function Reading() {
   /* ---------------- SINGLE MODE ---------------- */
   useEffect(() => {
     if (!isPlaying || mode !== "single") { clearInterval(intervalRef.current); return; }
+
     intervalRef.current = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setSingleIndex((prev) => (prev < words.length - 1 ? prev + 1 : prev));
-        setFade(true);
-      }, 80);
+      if (fadeEnabled) {
+        setFade(false);
+        setTimeout(() => {
+          setSingleIndex((prev) => prev < words.length - 1 ? prev + 1 : prev);
+          setFade(true);
+        }, 80);
+      } else {
+        setSingleIndex((prev) => prev < words.length - 1 ? prev + 1 : prev);
+      }
     }, msPerWord);
+
     return () => clearInterval(intervalRef.current);
-  }, [isPlaying, mode, msPerWord, words.length]);
+  }, [isPlaying, mode, msPerWord, words.length, fadeEnabled]);
 
   /* ---------------- CONTROLS ---------------- */
   const handleReset = () => {
     setIsPlaying(false);
     offsetRef.current = 0;
     verticalOffsetRef.current = -VERTICAL_PADDING;
+
     if (scrollRef.current) scrollRef.current.style.transform = "translateX(0px)";
     if (verticalScrollRef.current)
       verticalScrollRef.current.style.transform = `translateY(${VERTICAL_PADDING}px)`;
+
     setCurrentHorizontalIndex(0);
     setCurrentVerticalIndex(0);
     setSingleIndex(0);
+
     lastTimeRef.current = null;
     wordRefs.current = [];
     verticalWordRefs.current = [];
@@ -440,10 +485,8 @@ function Reading() {
     verticalCenters.current = [];
   };
 
-  /* ─── Word styles for the reader ─── */
   const wordStyle = {
     fontSize: 28,
-    fontWeight: "normal",
     fontFamily: "'Playfair Display', serif",
     color: "#2b1d0e",
     whiteSpace: "nowrap",
@@ -453,7 +496,6 @@ function Reading() {
   const verticalWordStyle = {
     fontSize: 28,
     fontFamily: "'Playfair Display', serif",
-    fontWeight: "normal",
     color: "#2b1d0e",
     textAlign: "center",
     letterSpacing: 1,
@@ -611,39 +653,68 @@ function Reading() {
           </div>
         )}
 
+        {/* SINGLE MODE */}
         {mode === "single" && (
           <div className="reader-box" style={{ minHeight: 60 }}>
             <div className="corner-ornament co-tl"><CornerSvg /></div>
             <div className="corner-ornament co-tr"><CornerSvg /></div>
             <div className="corner-ornament co-bl"><CornerSvg /></div>
             <div className="corner-ornament co-br"><CornerSvg /></div>
+
             <div
               style={{
+                position: "relative",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                minHeight: 80,
+                minHeight: 100,
                 padding: "24px 40px",
               }}
             >
+              {/* top guide */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 2,
+                  height: "28%",
+                  background: "linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0))",
+                }}
+              />
+              {/* bottom guide */}
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 2,
+                  height: "28%",
+                  background: "linear-gradient(0deg, rgba(0,0,0,0.18), rgba(0,0,0,0))",
+                }}
+              />
+
               <div
                 style={{
                   fontSize: 38,
                   fontFamily: "'Playfair Display', serif",
                   fontWeight: 700,
-
-                  color: "#2b1d0e",
                   letterSpacing: 2,
-                  opacity: fade ? 1 : 0,
-                  transition: "opacity 0.08s ease",
+                  opacity: fadeEnabled ? (fade ? 1 : 0) : 1,
+                  transition: fadeEnabled ? "opacity 0.08s ease" : "none",
+                  display: "flex",
+                  width: "100%",
+                  alignItems: "center",
                 }}
               >
-                {words[singleIndex]}
+                {renderPivotWord(words[singleIndex])}
               </div>
             </div>
           </div>
         )}
-
+        
         {/* ── WPM Control ── */}
         <div
           style={{
@@ -692,6 +763,12 @@ function Reading() {
           </button>
           <button className="action-btn btn-240" onClick={() => setWpm("240")}>
             ⏱ 240 WPM
+          </button>
+          <button
+            className={`mode-btn${fadeEnabled ? " active" : ""}`}
+            onClick={() => setFadeEnabled((f) => !f)}
+          >
+            ✦ FADE
           </button>
         </div>
 
