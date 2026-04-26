@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Reedy</string>
+    <string name="title_activity_main">Reedy</string>
+    <string name="package_name">com.sam.myreedy</string>
+    <string name="custom_url_scheme">com.sam.myreedy</string>
+</resources>

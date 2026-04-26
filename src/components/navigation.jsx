@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 export default function Navigation() {
   return (
     <div style={styles.navContainer}>
+      <div style={styles.menuLabel}>MENU</div>
       {[
         { to: "/reading", label: "Reading" },
         { to: "/six", label: "Six Digit" },
@@ -27,22 +28,36 @@ export default function Navigation() {
 const styles = {
   navContainer: {
     position: "fixed",
-    right: 20,
-    bottom: 20,
+    left: 20,
+    top: "50%",
+    transform: "translateY(-50%)",
     display: "flex",
     flexDirection: "column",
-    gap: 8,
+    gap: 10,
+    alignItems: "flex-start",
     zIndex: 1000,
   },
+  menuLabel: {
+    padding: "10px 14px",
+    borderRadius: 8,
+    background: "rgba(255, 255, 255, 0.95)",
+    border: "1px solid rgba(128, 107, 66, 0.35)",
+    color: "#4a340f",
+    fontSize: 12,
+    fontWeight: 700,
+    letterSpacing: 2,
+    textTransform: "uppercase",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.14)",
+  },
   navLink: {
-    padding: "10px 16px",
+    padding: "12px 18px",
     background: "linear-gradient(135deg, #e8d9a8ee 0%, #d4c07aee 100%)",
     border: "1.5px solid #c9a96e",
-    borderRadius: 2,
+    borderRadius: 4,
     color: "#2b1d0e",
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: "'Cinzel Decorative', serif",
-    letterSpacing: 2,
+    letterSpacing: 1.5,
     textDecoration: "none",
     textAlign: "center",
     display: "flex",
